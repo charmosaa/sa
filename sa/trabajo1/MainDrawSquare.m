@@ -37,7 +37,7 @@ for side = 1:4
 
     error_history = [];
 
-    while StopCondition(side, cx, cy)
+    while StopCondition(side, cx, cy, side_length)
         tic;
 
         [cx, cy, ct] = SimDiffRob(cx, cy, ct, dt, vc, wc);
