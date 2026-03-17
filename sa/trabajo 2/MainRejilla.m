@@ -1,4 +1,4 @@
-[pos obs] = ExtractPathScans('writelog_2026_03_09_18_20_36.log', 45/180*pi)
+[pos, obs] = ExtractPathScans('writelog_2026_03_09_18_20_36.log', 45/180*pi);
 
 cellSize = 0.1;
 
@@ -26,9 +26,9 @@ for i = 1:length(obs.x)
     idx_x = ceil((scan_x - minX) / cellSize);
     idx_y = ceil((scan_y - minY) / cellSize);
     
-    % no 0 in matlab?
-    idx_x(idx_x == 0) = 1;
-    idx_y(idx_y == 0) = 1;
+    % check boundaries
+    idx_x = max(1, min(idx_x, cols));
+    idx_y = max(1, min(idx_y, rows));
     
     % count laser
     for j = 1:length(idx_x)
@@ -37,16 +37,24 @@ for i = 1:length(obs.x)
 end
 
 
-% visualization 2D map
+% visualization 3D map
 gridMapNorm = gridMap / max(gridMap(:));
 
+[X, Y] = meshgrid(1:cols, 1:rows);
+
 figure;
-imagesc(gridMapNorm);
-
-colormap(flipud(gray)); 
-
+surf(X, Y, gridMapNorm);
+shading interp;         
+colormap(jet);
 colorbar;
 
-title('Mapa con obstaculos');
+view(3);
+grid on;
+title('Mapa de obstaculos 3D');
 xlabel('X');
 ylabel('Y');
+zlabel('Probabilidad');
+
+% save in .mat format
+save('mapa_obstaculos_final.mat', 'gridMapNorm', 'X', 'Y', 'cellSize', 'minX', 'minY');
+fprintf('Mapa guardado correctamente en .mat\n');
