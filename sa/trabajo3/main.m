@@ -104,32 +104,32 @@ fprintf('Distancia de la ruta 3 (inflada): %.2f m\n', distancia3);
 %% 4. Influencia del tamaño de las celdas
 cellSize_grande = 0.2;
 mapaBinarizada_grande = imresize(mapaBinarizada, 0.1/cellSize_grande, 'nearest');
-mapa_grande = binaryOccupancyMap(mapaBinarizada_grande, 1/cellSize_grande);
+mapa_gran = binaryOccupancyMap(mapaBinarizada_grande, 1/cellSize_grande);
 
-start4_grande_grid = world2grid(mapa_grande, start3_world);
-goal4_grande_grid = world2grid(mapa_grande, goal3_world);
-planner4_grande = plannerAStarGrid(mapa_grande);
+start4_grande_grid = world2grid(mapa_gran, start3_world);
+goal4_grande_grid = world2grid(mapa_gran, goal3_world);
+planner4_grande = plannerAStarGrid(mapa_gran);
 
 tic;
 [path4_grande_grid, debugInfo4_grande] = plan(planner4_grande, start4_grande_grid, goal4_grande_grid);
 tiempo_grandes = toc;
 fprintf('Tiempo de cómputo para celdas GRANDES (0.2m): %.4f segundos\n', tiempo_grandes);
 
-cellSize_pequena = 0.02;
-mapaBinarizada_pequena = imresize(mapaBinarizada, 0.1/cellSize_pequena, 'nearest');
-mapa_pequena = binaryOccupancyMap(mapaBinarizada_pequena, 1/cellSize_pequena);
+cellSize_peq = 0.02;
+mapaBinarizada_pequena = imresize(mapaBinarizada, 0.1/cellSize_peq, 'nearest');
+mapa_peq = binaryOccupancyMap(mapaBinarizada_pequena, 1/cellSize_peq);
 
-start4_pequena_grid = world2grid(mapa_pequena, start3_world);
-goal4_pequena_grid = world2grid(mapa_pequena, goal3_world);
-planner4_pequena = plannerAStarGrid(mapa_pequena);
+start4_pequena_grid = world2grid(mapa_peq, start3_world);
+goal4_pequena_grid = world2grid(mapa_peq, goal3_world);
+planner4_pequena = plannerAStarGrid(mapa_peq);
 
 tic;
 [path4_pequena_grid, debugInfo4_pequena] = plan(planner4_pequena, start4_pequena_grid, goal4_pequena_grid);
 tiempo_pequenas = toc;
 fprintf('Tiempo de cómputo para celdas PEQUEÑAS (0.02m): %.4f segundos\n', tiempo_pequenas);
 
-path4_grande_world = grid2world(mapa_grande, path4_grande_grid);
-path4_pequena_world = grid2world(mapa_pequena, path4_pequena_grid);
+path4_grande_world = grid2world(mapa_gran, path4_grande_grid);
+path4_pequena_world = grid2world(mapa_peq, path4_pequena_grid);
 
 figure;
 subplot(1,2,1);
@@ -152,11 +152,20 @@ exportgraphics(gcf, 'actividad_4_imagen.png', 'Resolution', 300);
 
 
 %% 5. Trayectoria suavizada
-t = 1:size(path3_world, 1);
-t_smooth = 1:0.1:size(path3_world, 1);
+paso = 8; 
+indices = 1:paso:size(path3_world, 1);
 
-path_smooth_x = spline(t, path3_world(:,1), t_smooth);
-path_smooth_y = spline(t, path3_world(:,2), t_smooth);
+if indices(end) ~= size(path3_world, 1)
+    indices = [indices, size(path3_world, 1)];
+end
+
+puntos_control = path3_world(indices, :);
+
+t = 1:size(puntos_control, 1);
+t_smooth = 1:0.2:size(puntos_control, 1);
+
+path_smooth_x = spline(t, puntos_control(:,1), t_smooth);
+path_smooth_y = spline(t, puntos_control(:,2), t_smooth);
 path_smooth = [path_smooth_x', path_smooth_y'];
 
 colisiones = checkOccupancy(mapa, path_smooth);
@@ -165,16 +174,16 @@ num_colisiones = sum(colisiones);
 figure;
 show(mapa);
 hold on;
-h1 = plot(path3_world(:,1), path3_world(:,2), 'c-', 'LineWidth', 5);
+h1 = plot(path3_world(:,1), path3_world(:,2), 'c-', 'LineWidth', 2.5);
 h2 = plot(path_smooth(:,1), path_smooth(:,2), 'y-', 'LineWidth', 2.5);
 h3 = plot(start3_world(1), start3_world(2), 'go', 'MarkerSize', 8, 'MarkerFaceColor', 'g');
 h4 = plot(goal3_world(1), goal3_world(2), 'ro', 'MarkerSize', 8, 'MarkerFaceColor', 'r');
 
 title('5. Trayectoria suavizada');
-legend([h1, h2, h3, h4], 'Ruta original (inflada)', 'Ruta suavizada', 'Start', 'Meta');
+legend([h1, h2, h3, h4], 'Ruta original', 'Ruta suavizada', 'Start', 'Meta');
 
 save('actividad_5_resultado.mat', 'path_smooth');
-saveas(gcf, 'actividad_5_imagen.png');
+exportgraphics(gcf, 'actividad_5_imagen.png', 'Resolution', 300);
 
 fprintf('Ruta suavizada. Colisiones: %d\n', num_colisiones);
 
