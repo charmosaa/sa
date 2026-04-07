@@ -38,14 +38,14 @@ end
 
 
 % visualization 3D map
-gridMapNorm = gridMap / max(gridMap(:));
+gridMapNorm = gridMap / max(max(gridMap(:)), 1);
 
 [X, Y] = meshgrid(1:cols, 1:rows);
 
 figure;
 surf(X, Y, gridMapNorm);
 shading interp;         
-colormap(jet);
+colormap("turbo");
 colorbar;
 
 view(3);

@@ -1,8 +1,10 @@
 %% 0. Setup
-load('mapa_obstaculos_final.mat');
+clear; close all; clc;
+
+data = load('mapa_obstaculos_final.mat');
 threshold = 0.03; 
-mapBin = gridMapNorm > threshold;
-map = binaryOccupancyMap(mapBin, 1/cellSize);
+mapBin = data.gridMapNorm > threshold;
+map = binaryOccupancyMap(mapBin, 1/data.cellSize);
 
 figure;
 show(map);
@@ -64,7 +66,7 @@ fprintf('Distancia de la ruta 3 (inflada): %.2f m\n', distance3);
 %% 4. Influence of cell size
 % Large cells
 cellSizeLarge = 0.2;
-mapBinLarge = imresize(mapBin, 0.1/cellSizeLarge, 'nearest');
+mapBinLarge = imresize(mapBin, data.cellSize/cellSizeLarge, 'nearest');
 mapLarge = binaryOccupancyMap(mapBinLarge, 1/cellSizeLarge);
 
 start4LargeGrid = world2grid(mapLarge, start3World);
@@ -78,7 +80,7 @@ fprintf('Tiempo de cómputo para celdas GRANDES (0.2m): %.4f s\n', timeLarge);
 
 % Small cells
 cellSizeSmall = 0.02;
-mapBinSmall = imresize(mapBin, 0.1/cellSizeSmall, 'nearest');
+mapBinSmall = imresize(mapBin, data.cellSize/cellSizeSmall, 'nearest');
 mapSmall = binaryOccupancyMap(mapBinSmall, 1/cellSizeSmall);
 
 start4SmallGrid = world2grid(mapSmall, start3World);
